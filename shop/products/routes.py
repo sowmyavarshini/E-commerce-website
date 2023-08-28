@@ -29,18 +29,18 @@ def result():
     return render_template('products/result.html', products=products, brands=brands(), categories=categories())
 
 
+@app.route('/product/<int:id>')
+def single_page(id):
+    product = Addproduct.query.get_or_404(id)
+    return render_template('products/single_page.html', product=product, brands=brands(), categories=categories())
+
+
 @app.route('/brand/<int:id>')
 def get_brand(id):
     get_b = Brand.query.filter_by(id=id).first_or_404()
     page = request.args.get('page', 1, type=int)
     brand = Addproduct.query.filter_by(brand=get_b).paginate(page=page, per_page=8)
     return render_template('products/index.html', brand=brand, brands=brands(), categories=categories(), get_b=get_b)
-
-
-@app.route('/product/<int:id>')
-def single_page(id):
-    product = Addproduct.query.get_or_404(id)
-    return render_template('products/single_page.html', product=product, brands=brands(), categories=categories())
 
 
 @app.route('/categories/<int:id>')
@@ -66,6 +66,33 @@ def addbrand():
     return render_template('products/addbrands.html', brands='brands')
 
 
+@app.route('/updatebrand/<int:id>', methods=["GET", "POST"])
+def updatebrand(id):
+    if 'email' not in session:
+        flash(f'Please login first', 'danger')
+        return redirect(url_for('login'))
+    updatebrand = Brand.query.get_or_404(id)
+    brand = request.form.get('brand')
+    if request.method == 'POST':
+        updatebrand.name = brand
+        flash(f'Your brand has been updated', 'success')
+        db.session.commit()
+        return redirect(url_for('brands'))
+    return render_template('products/updatebrand.html', title='Update Brand page', updatebrand=updatebrand)
+
+
+@app.route('/deletebrand/<int:id>', methods=['POST'])
+def deletebrand(id):
+    brand = Brand.query.get_or_404(id)
+    if request.method == 'POST':
+        db.session.delete(brand)
+        db.session.commit()
+        flash(f'The brand {brand.name} was deleted from your database', 'success')
+        return redirect(url_for('admin'))
+    flash(f'The brand {brand.name} can\'t be deleted from your database', 'warning')
+    return redirect(url_for('admin'))
+
+
 @app.route('/addcat', methods=['GET', 'POST'])
 def addcat():
     if 'email' not in session:
@@ -79,6 +106,33 @@ def addcat():
         db.session.commit()
         return redirect(url_for('addcat'))
     return render_template('products/addbrands.html')
+
+
+@app.route('/updatecat/<int:id>', methods=["GET", "POST"])
+def updatecat(id):
+    if 'email' not in session:
+        flash(f'Please login first', 'danger')
+        return redirect(url_for('login'))
+    updatecat = Category.query.get_or_404(id)
+    category = request.form.get('category')
+    if request.method == 'POST':
+        updatecat.name = category
+        flash(f'Your category has been updated', 'success')
+        db.session.commit()
+        return redirect(url_for('category'))
+    return render_template('products/updatebrand.html', title='Update Category page', updatecat=updatecat)
+
+
+@app.route('/deletecategory/<int:id>', methods=['POST'])
+def deletecategory(id):
+    category = Category.query.get_or_404(id)
+    if request.method == 'POST':
+        db.session.delete(category)
+        db.session.commit()
+        flash(f'The brand {category.name} was deleted from your database', 'success')
+        return redirect(url_for('admin'))
+    flash(f'The brand {category.name} can\'t be deleted from your database', 'warning')
+    return redirect(url_for('admin'))
 
 
 @app.route('/addproduct', methods=['GET', 'POST'])
@@ -156,3 +210,21 @@ def updateproduct(id):
     form.colors.data = product.colors
     form.description.data = product.desc
     return render_template('products/updateproduct.html', form=form, brands=brands, categories=categories, product=product)
+
+
+@app.route('/deleteproduct/<int:id>', methods=['POST'])
+def deleteproduct(id):
+    product = Addproduct.query.get_or_404(id)
+    if request.method =="POST":
+        try:
+            os.unlink(os.path.join(current_app.root_path, "static/images/" + product.image_1))
+            os.unlink(os.path.join(current_app.root_path, "static/images/" + product.image_2))
+            os.unlink(os.path.join(current_app.root_path, "static/images/" + product.image_3))
+        except Exception as e:
+            print(e)
+        db.session.delete(product)
+        db.session.commit()
+        flash(f'The product {product.name} was delete from your record','success')
+        return redirect(url_for('admin'))
+    flash(f'Can not delete the product', 'success')
+    return redirect(url_for('admin'))
