@@ -8,13 +8,13 @@ from flask_msearch import Search
 from flask_login import LoginManager
 
 
-basedir = os.path.abspath(os.path.dirname(__file__))
-load_dotenv
-app = Flask(__name__)
+load_dotenv()
 Secret_key = os.getenv("SECRET_KEY")
+app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", Secret_key)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL", "sqlite:///shop.db")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'static/images')
 
 photos = UploadSet('photos', IMAGES)
