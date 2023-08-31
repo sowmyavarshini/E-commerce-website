@@ -29,6 +29,21 @@
           <a class="dropdown-item" href="{{url_for('addcat')}}">Add category</a>
         </div>
       </li>
+         {% if current_user.is_authenticated %}
+       <li class="nav-item">
+        <a href="{{url_for('admin_logout')}}" class="nav-link">{{current_user.name}}</a>
+      </li>
+      <li class="nav-item">
+        <a href="{{url_for('admin_logout')}}" class="nav-link">Logout</a>
+      </li>
+      {% else %}
+      <li class="nav-item">
+        <a href="{{url_for('register')}}" class="nav-link">Sign in</a>
+      </li>
+       <li class="nav-item">
+        <a href="{{url_for('login')}}" class="nav-link">Login</a>
+      </li>
+      {% endif %}
     </ul>
   </div>
 </nav>
@@ -75,7 +90,7 @@
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <form action="{{url_for('deletecategory',id=product.id)}}" method="post">
+                <form action="{{url_for('deleteproduct',id=product.id)}}" method="post">
                   <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
 

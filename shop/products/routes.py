@@ -1,5 +1,6 @@
 from flask import redirect, render_template, url_for, flash, request, session, current_app
 from shop import db, app, photos, search
+from flask_login import login_required, current_user, logout_user, login_user
 from .models import Brand, Category, Addproduct
 from .forms import Addproducts
 import secrets, os
@@ -52,10 +53,8 @@ def get_categories(id):
 
 
 @app.route('/addbrand', methods=['GET', 'POST'])
+@login_required
 def addbrand():
-    if 'email' not in session:
-        flash(f'Please login first', 'danger')
-        return redirect(url_for('login'))
     if request.method == 'POST':
         getbrand = request.form.get('brand')
         brand = Brand(name=getbrand)
@@ -67,10 +66,8 @@ def addbrand():
 
 
 @app.route('/updatebrand/<int:id>', methods=["GET", "POST"])
+@login_required
 def updatebrand(id):
-    if 'email' not in session:
-        flash(f'Please login first', 'danger')
-        return redirect(url_for('login'))
     updatebrand = Brand.query.get_or_404(id)
     brand = request.form.get('brand')
     if request.method == 'POST':
@@ -82,6 +79,7 @@ def updatebrand(id):
 
 
 @app.route('/deletebrand/<int:id>', methods=['POST'])
+@login_required
 def deletebrand(id):
     brand = Brand.query.get_or_404(id)
     if request.method == 'POST':
@@ -94,10 +92,8 @@ def deletebrand(id):
 
 
 @app.route('/addcat', methods=['GET', 'POST'])
+@login_required
 def addcat():
-    if 'email' not in session:
-        flash(f'Please login first', 'danger')
-        return redirect(url_for('login'))
     if request.method == 'POST':
         getbrand = request.form.get('category')
         cat = Category(name=getbrand)
@@ -109,21 +105,20 @@ def addcat():
 
 
 @app.route('/updatecat/<int:id>', methods=["GET", "POST"])
+@login_required
 def updatecat(id):
-    if 'email' not in session:
-        flash(f'Please login first', 'danger')
-        return redirect(url_for('login'))
     updatecat = Category.query.get_or_404(id)
     category = request.form.get('category')
     if request.method == 'POST':
         updatecat.name = category
-        flash(f'Your category has been updated', 'success')
+        flash('Your category has been updated', 'success')
         db.session.commit()
         return redirect(url_for('category'))
     return render_template('products/updatebrand.html', title='Update Category page', updatecat=updatecat)
 
 
 @app.route('/deletecategory/<int:id>', methods=['POST'])
+@login_required
 def deletecategory(id):
     category = Category.query.get_or_404(id)
     if request.method == 'POST':
@@ -136,10 +131,8 @@ def deletecategory(id):
 
 
 @app.route('/addproduct', methods=['GET', 'POST'])
+@login_required
 def addproduct():
-    if 'email' not in session:
-        flash(f'Please login first', 'danger')
-        return redirect(url_for('login'))
     brands = Brand.query.all()
     categories = Category.query.all()
     form = Addproducts(request.form)
@@ -166,6 +159,7 @@ def addproduct():
 
 
 @app.route('/updateproduct/<int:id>', methods=['GET', 'POST'])
+@login_required
 def updateproduct(id):
     brands = Brand.query.all()
     categories = Category.query.all()
@@ -213,6 +207,7 @@ def updateproduct(id):
 
 
 @app.route('/deleteproduct/<int:id>', methods=['POST'])
+@login_required
 def deleteproduct(id):
     product = Addproduct.query.get_or_404(id)
     if request.method =="POST":
@@ -224,7 +219,7 @@ def deleteproduct(id):
             print(e)
         db.session.delete(product)
         db.session.commit()
-        flash(f'The product {product.name} was delete from your record','success')
+        flash(f'The product {product.name} was delete from your record', 'success')
         return redirect(url_for('admin'))
-    flash(f'Can not delete the product', 'success')
+    flash('Can not delete the product', 'danger')
     return redirect(url_for('admin'))

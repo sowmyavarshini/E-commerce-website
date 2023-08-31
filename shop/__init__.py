@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 import os
 from dotenv import load_dotenv
@@ -29,9 +29,7 @@ search.init_app(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'customerLogin'
-login_manager.needs_refresh_message_category = 'danger'
-login_manager.login_message = 'Please login first'
+
 
 from shop.admin import routes
 from shop.products import routes
